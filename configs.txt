@@ -2,3 +2,7 @@
 #subscription-userinfo: upload=0; download=0; total=10737418240000000; expire=0
 #profile-update-interval: 6
 
+vless#CVP - 1 (Unverified)
+vmess#CVP - 2 (Unverified)
+trojan#CVP - 3 (Unverified)
+ss#CVP - 4 (Unverified)
