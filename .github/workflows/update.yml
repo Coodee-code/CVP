@@ -1,0 +1,32 @@
+name: Update Configs
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # هر 6 ساعت یکبار اجرا می‌شود
+  workflow_dispatch: # امکان اجرای دستی
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run script
+        run: python main.py
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add configs.txt
+          git commit -m "Update configs: $(date)" || exit 0
+          git push
