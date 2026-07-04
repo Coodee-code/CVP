@@ -10,6 +10,9 @@ SOURCES = [
     "https://raw.githubusercontent.com/Created-By/Telegram-Eag1e_YT/main/%40Eag1e_YT",
     "https://raw.githubusercontent.com/peweza/PUBLICSUB/refs/heads/main/PewezaVPNPubSUB",
     "https://raw.githubusercontent.com/barry-far/V2RAY-CONFIGS/main/Warp-Lite",
+    "https://raw.githubusercontent.com/hiddify/hiddify-app/refs/heads/main/test.configs/warp",
+    "https://raw.githubusercontent.com/hiddify/hiddify-app/refs/heads/main/test.configs/mahsa",
+    "https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/configs/proxy_configs.txt",
     "https://t.me/s/v2ray_outlineir",
     "https://t.me/s/V2rayCollectorOfficial"
 ]
