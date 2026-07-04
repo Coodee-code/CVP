@@ -17,7 +17,7 @@ SOURCES = [
     "https://t.me/s/V2rayCollectorOfficial"
 ]
 
-HEADERS = """#profile-title: base64:8J+UsFBld2V6YVZQTi1QdWJsaWMtU1VC
+HEADERS = """#profile-title: CVP(Collector-V2ray-PRO)
 #subscription-userinfo: upload=0; download=0; total=10737418240000000; expire=0
 #profile-update-interval: 6
 
