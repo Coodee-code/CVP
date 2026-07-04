@@ -5,14 +5,14 @@ import base64
 import json
 from urllib.parse import urlparse
 
-# منابع
+# منابع ارسالی شما + منابع کمکی معتبر
 SOURCES = [
+    "https://raw.githubusercontent.com/Created-By/Telegram-Eag1e_YT/main/%40Eag1e_YT",
+    "https://raw.githubusercontent.com/peweza/PUBLICSUB/refs/heads/main/PewezaVPNPubSUB",
     "https://raw.githubusercontent.com/barry-far/V2RAY-CONFIGS/main/Warp-Lite",
     "https://t.me/s/v2ray_outlineir",
     "https://t.me/s/V2rayCollectorOfficial",
     "https://t.me/s/v2ray_free_conf",
-    "https://raw.githubusercontent.com/Created-By/Telegram-Eag1e_YT/main/%40Eag1e_YT",
-    "https://raw.githubusercontent.com/peweza/PUBLICSUB/refs/heads/main/PewezaVPNPubSUB",
     "https://t.me/s/v2ray_tk"
 ]
 
@@ -23,64 +23,78 @@ HEADERS = """#profile-title: base64:8J+UsFBld2V6YVZQTi1QdWJsaWMtU1VC
 """
 
 def is_alive(config):
-    """بررسی باز بودن پورت کانفیگ (تست سلامت ساده)"""
+    """تست سریع باز بودن پورت برای اطمینان از زنده بودن سرور"""
     try:
+        host, port = None, None
         if config.startswith("vmess://"):
-            # دیکود کردن vmess برای پیدا کردن آدرس و پورت
-            data = json.loads(base64.b64decode(config[8:]).decode('utf-8'))
-            ip = data['add']
-            port = int(data['port'])
+            data = config[8:].split('#')[0]
+            # اصلاح پدینگ بیس64
+            missing_padding = len(data) % 4
+            if missing_padding: data += '=' * (4 - missing_padding)
+            decoded = json.loads(base64.b64decode(data).decode('utf-8'))
+            host, port = decoded.get('add'), decoded.get('port')
         else:
-            # برای vless, trojan, ss
             parsed = urlparse(config)
-            ip = parsed.hostname
-            port = parsed.port
+            host, port = parsed.hostname, parsed.port
         
-        # تست اتصال به آی‌پی و پورت در ۲ ثانیه
-        with socket.create_connection((ip, port), timeout=2):
-            return True
+        if host and port:
+            with socket.create_connection((host, int(port)), timeout=2):
+                return True
     except:
-        return False
+        pass
+    return False
 
 def get_configs():
-    configs = []
+    unique_configs = set()
+    # شناسایی انواع پروتکل‌ها: vmess, vless, trojan, ss, tuic, hysteria2
+    pattern = r'(vless|vmess|trojan|ss|shadowsocks|tuic|hysteria2|hy2)://[^\s<>"\'|]+'
+    
     for source in SOURCES:
         try:
-            response = requests.get(source, timeout=10)
-            if response.status_code == 200:
-                found = re.findall(r'(vless|vmess|trojan|ss|shadowsocks)://[^\s<>"\'#]+', response.text)
+            print(f"در حال دریافت از: {source}")
+            res = requests.get(source, timeout=15)
+            if res.status_code == 200:
+                # اگر منبع خودش بیس64 شده باشد (مثل برخی ساب‌ها)
+                content = res.text
+                try:
+                    # تست برای دیکود کردن کل فایل اگر بیس64 بود
+                    decoded_content = base64.b64decode(content).decode('utf-8')
+                    content = decoded_content
+                except:
+                    pass
+                
+                found = re.findall(pattern, content)
                 for link in found:
-                    # تمیز کردن لینک از کاراکترهای اضافه تلگرام
-                    clean_link = re.split(r'[ \n\r\t<>]', link)[0]
-                    if clean_link not in configs:
-                        configs.append(clean_link)
+                    # تمیزکاری نهایی لینک
+                    clean_link = link.split('#')[0].split('"')[0].split("'")[0]
+                    unique_configs.add(clean_link)
         except Exception as e:
-            print(f"Error fetching from {source}: {e}")
-    return configs
+            print(f"خطا در منبع {source}: {e}")
+            
+    return list(unique_configs)
 
 def main():
-    print("Fetching configs...")
     raw_configs = get_configs()
-    print(f"Found {len(raw_configs)} configs. Testing health...")
+    print(f"تعداد کل کانفیگ‌های یافت شده: {len(raw_configs)}")
     
-    working_configs = []
+    final_list = []
     counter = 1
     
     for conf in raw_configs:
+        # تست سلامت (می‌توانید برای دریافت تمام کانفیگ‌ها این شرط if را بردارید)
         if is_alive(conf):
-            # حذف نام قدیمی و اضافه کردن CVP - 1
-            base = conf.split('#')[0]
-            working_configs.append(f"{base}#CVP - {counter}")
+            # تغییر نام به CVP - 1, ...
+            # در پروتکل‌های مدرن مثل hy2 و tuic نام در انتهای لینک بعد از # است
+            final_list.append(f"{conf}#CVP - {counter}")
             counter += 1
-            # محدودیت برای جلوگیری از طولانی شدن بیش از حد (اختیاری)
-            if counter > 200: break 
-    
+            if counter > 500: break # محدودیت برای جلوگیری از سنگین شدن ساب
+            
     with open("configs.txt", "w", encoding="utf-8") as f:
         f.write(HEADERS)
-        for conf in working_configs:
-            f.write(conf + "\n")
+        for c in final_list:
+            f.write(c + "\n")
             
-    print(f"Finished! {len(working_configs)} healthy configs saved.")
+    print(f"عملیات موفقیت‌آمیز: {len(final_list)} کانفیگ سالم ذخیره شد.")
 
 if __name__ == "__main__":
     main()
