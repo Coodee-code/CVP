@@ -2,12 +2,14 @@ name: Update Configs
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # هر 6 ساعت یکبار اجرا می‌شود
-  workflow_dispatch: # امکان اجرای دستی
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions: # اضافه کردن دسترسی نوشتن
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -18,7 +20,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install requests
 
       - name: Run script
         run: python main.py
